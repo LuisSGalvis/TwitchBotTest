@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "obs-websocket-js": "^5.0.7",
+    "tmi.js": "^1.8.5"
+  }
+}
