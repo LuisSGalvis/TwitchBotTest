@@ -35,12 +35,17 @@ const commands={
   {
     const result = Math.floor(Math.random() * 6) + 1;
 
-    if(result < 6) 
+    if(result = 1)
+    {
+      client.say(channel, `@${tags.username}, sacaste un 1, eso no es bueno`);
+    }
+    else if(result>1 && result<6) 
     {
       client.say(channel, `@${tags.username}, sacaste un ${result}!`);
-    } else {
+    } 
+    else 
+    {
       client.say(channel, `@${tags.username}, sacaste un 6! que impresionante eres`);
-      
     }
     dado(result);
   },
@@ -145,7 +150,24 @@ async function SuscRaid(sessionId) {
 }
 
 async function dado(number){
-    if (number<6){
+    if(number=1)
+      {
+                await obs.call('SetSceneItemEnabled', {
+        sceneName: "Escena",
+        sceneItemId: 15, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneItemEnabled: true
+        });
+
+        setTimeout(async () => {
+        await obs.call('SetSceneItemEnabled', {
+            sceneName: "Escena",
+            sceneItemId: 15,
+            sceneItemEnabled: false
+            });
+        }, 3000);
+      }
+    else if (number<6 && number>1)
+      {
         await obs.call('SetSceneItemEnabled', {
         sceneName: "Escena",
         sceneItemId: 7, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
@@ -158,8 +180,10 @@ async function dado(number){
             sceneItemId: 7,
             sceneItemEnabled: false
             });
-        }, 3000);}
-    else{
+        }, 3000);
+      }
+    else
+      {
         await obs.call('SetSceneItemEnabled', {
         sceneName: "Escena",
         sceneItemId: 8,
