@@ -210,13 +210,13 @@ async function listarItemsDeEscena(sceneName) {
     const res = await obs.call("GetSceneItemList", {
       sceneName: sceneName
     });
-    console.log(`📌 Items de la escena ${sceneName}:`);
+    console.log(`Items de la escena ${sceneName}:`);
     res.sceneItems.forEach(item => {
       console.log(`ID: ${item.sceneItemId} | Nombre: ${item.sourceName}`);
     });
 
   } catch (err) {
-    console.error("❌ Error obteniendo items:", err);
+    console.error("Error obteniendo items:", err);
   }
 }
 async function verHotkeys() {
@@ -259,10 +259,10 @@ async function N_Raid(Nombre,cantidad) {
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
-        inputName: "Texto",
+        inputName: "Texto", //es el mismo que de seguidores porque soy recursivo
         inputSettings: {
             text: `Raid de ${Nombre}!, 
-            con una cantidad de ${cantidad} personas!`//es el mismo que de seguidores porque soy recursivo
+            con una cantidad de ${cantidad} personas!`
         }
     });
         setTimeout(async () => {
