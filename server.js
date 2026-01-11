@@ -27,7 +27,7 @@ obs.on('Identified', async () => {
 
     console.log('Escena activa:', currentProgramSceneName);
     listarItemsDeEscena(currentProgramSceneName);
-    listarItemsDentroDeGrupo('Bot', currentProgramSceneName);
+    //listarItemsDentroDeGrupo('Bot', currentProgramSceneName);
   } catch (err) {
     console.error('Error obteniendo escena actual:', err);
   }
@@ -127,12 +127,26 @@ async function actualizarEscenaYBot() {
     console.log('Escena activa:', currentProgramSceneName);
     
     listarItemsDeEscena(currentProgramSceneName);
-    listarItemsDentroDeGrupo('Bot', currentProgramSceneName);
+    //listarItemsDentroDeGrupo('Bot', currentProgramSceneName);
+    esc = currentProgramSceneName;
   } catch (err) {
     console.error('Error actualizando:', err);
   }
 }
+async function IdPorNombre(nombre,escena) {
+  try {
+    const res = await obs.call("GetSceneItemList", {
+      sceneName: esc
+    });
+    item = sceneItems.find(
+    i => i.sourceName === nombre
+    );
+    return item.sceneItemId;
 
+  } catch (err) {
+    console.error("Error obteniendo items:", err);
+  }
+}
 async function listarItemsDentroDeGrupo(grupoNombre, escenaActual) {
   try {
     const { sceneItems } = await obs.call('GetGroupSceneItemList', {
@@ -147,7 +161,6 @@ async function listarItemsDentroDeGrupo(grupoNombre, escenaActual) {
     console.error('Error listando items del grupo:', err);
   }
 }
-
 async function SuscFollow(sessionId) {
   await fetch("https://api.twitch.tv/helix/eventsub/subscriptions", {
     method: "POST",
@@ -192,20 +205,19 @@ async function SuscRaid(sessionId) {
   });
 
 }
-
 async function dado(number){
     if(number==1)
       {
                 await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 24, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: esc,
+        sceneItemId: IdPorNombre("explosion",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
 
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-            sceneName: "Bot",
-            sceneItemId: 24,
+            sceneName: esc,
+            sceneItemId: IdPorNombre("explosion",esc),
             sceneItemEnabled: false
             });
         }, 3000);
@@ -213,15 +225,15 @@ async function dado(number){
     else if (number<6 && number>1)
       {
         await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 26, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: esc,
+        sceneItemId: 3, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
 
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-            sceneName: "Bot",
-            sceneItemId: 26,
+            sceneName: esc,
+            sceneItemId: 3,
             sceneItemEnabled: false
             });
         }, 3000);
@@ -229,15 +241,15 @@ async function dado(number){
     else
       {
         await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 23,
+        sceneName: esc,
+        sceneItemId: IdPorNombre("6",esc),
         sceneItemEnabled: true
         });
         clap();
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 23,
+        sceneName: esc,
+        sceneItemId: IdPorNombre("6",esc),
         sceneItemEnabled: false
         });
         }, 3000);
@@ -269,8 +281,8 @@ async function verHotkeys() {
 }
 async function N_Follow(Nombre) {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 24, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: esc,
+        sceneItemId: IdPorNombre("follow",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -283,8 +295,8 @@ async function N_Follow(Nombre) {
 
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: 24,
+        sceneName: esc,
+        sceneItemId: IdPorNombre("follow",esc),
         sceneItemEnabled: false
         });
         
@@ -299,7 +311,7 @@ async function N_Follow(Nombre) {
 async function N_Raid(Nombre,cantidad) {
     await obs.call('SetSceneItemEnabled', {
         sceneName: esc,
-        sceneItemId: "Bot", //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneItemId: IdPorNombre("raid",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -312,7 +324,7 @@ async function N_Raid(Nombre,cantidad) {
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
         sceneName: esc,
-        sceneItemId: "Bot",
+        sceneItemId: IdPorNombre("raid",esc),
         sceneItemEnabled: false
         });
         }, 3000);
