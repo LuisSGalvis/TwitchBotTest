@@ -111,6 +111,19 @@ const commands={
   "!test":()=>
     {
       N_Follow("a")
+    },
+  "!pet":()=>
+    {
+      AnimacionesEx("pet")
+    },
+  "!comida":()=>
+    {
+      const result = Math.floor(Math.random() * 5) + 1;
+      AnimacionesEx(`minecraft${result}`);
+    },
+  "!dance":()=>
+    {
+      AnimacionesEx("baile")
     }
 
 }
@@ -388,6 +401,21 @@ async function N_Raid(Nombre,cantidad) {
 }
 async function N_Update(nombre,titulo,categoria) {
   client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
+}//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
+async function AnimacionesEx(nombre) {//para dance, pet y comida
+    await obs.call('SetSceneItemEnabled', {
+          sceneName: esc,
+          sceneItemId: IdPorNombre(nombre,esc),
+          sceneItemEnabled: true
+          });
+
+        setTimeout(async () => {
+        await obs.call('SetSceneItemEnabled', {
+            sceneName: esc,
+            sceneItemId: IdPorNombre(nombre,esc),
+            sceneItemEnabled: false
+            });
+        }, 3000);
 }
 //ideas: !dance: perro bailando, !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion, !pet: se explica solo
 //!comida: come un alimento aleatorio de minecraft, !sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
