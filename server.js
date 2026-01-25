@@ -5,6 +5,31 @@ const obs = new OBSWebSocket();
 const WebSocket = require("ws");
 const fetch = require("node-fetch");
 const eventsub = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
+//const fs = require('fs');
+
+// const data = { nombre: "Juan", edad: 30 };
+// const jsonString = JSON.stringify(data, null, 2); // null, 2 para formato legible
+
+// fs.writeFile('datos.json', jsonString, (err) => {
+//   if (err) {
+//     console.error('Error al escribir archivo:', err);
+//   } else {
+//     console.log('¡Datos guardados en datos.json!');
+//   }
+// });
+// fs.readFile('datos.json', 'utf8', (err, jsonString) => {
+//   if (err) {
+//     console.error('Error al leer archivo:', err);
+//     return;
+//   }
+//   try {
+//     const data = JSON.parse(jsonString);
+//     console.log('Datos cargados:', data); // Aquí tienes el objeto JS
+//   } catch (err) {
+//     console.error('Error al parsear JSON:', err);
+//   }
+// });
+
 
 obs.connect(
     `ws://${process.env.OBS_IP}:${process.env.OBS_PORT}`, process.env.OBS_PASSWORD
@@ -73,20 +98,30 @@ const commands={
 
   "!hola": (channel, tags) => 
     {
-    client.say(channel, `@${tags.username}, bienvenido al chat!`);
-    obs.call("TriggerMediaInputAction", {
-      inputName: "Hola",
-      mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
-    });
+      client.say(channel, `@${tags.username}, bienvenido al chat!`);
+      sonidos("Hola");
     },
   "!clap":() =>
     {
-      clap();
+      sonidos("Aplausos");
     },
-    "!test":()=>
-      {
-        N_Follow("a")
-      }
+  "!test":()=>
+    {
+      N_Follow("a");
+    },
+  "!pet":()=>
+    {
+      AnimacionesEx("pet");
+    },
+  "!comida":()=>
+    {
+      const result = Math.floor(Math.random() * 5) + 1;
+      AnimacionesEx(`minecraft${result}`);
+    },
+  "!dance":()=>
+    {
+      AnimacionesEx("baile")
+    },
 
 }
 
@@ -109,6 +144,7 @@ eventsub.on("message", async (raw) => {
     console.log("Session ID:", sessionId);
     await SuscFollow(sessionId);
     await SuscRaid(sessionId);
+    await SuscUpdate(sessionId);
   }
   if (msg.metadata?.message_type === "notification") {
     const { type, event } = msg.payload;
@@ -117,6 +153,9 @@ eventsub.on("message", async (raw) => {
     }
     if (type === "channel.raid") {
       N_Raid(event.from_broadcaster_user_name,event.viewers)
+    }
+    if (type==="channel.update"){
+      N_Update(event.from_broadcaster_user_name,event.title,event.category_name)
     }
   }
 });
@@ -135,12 +174,14 @@ async function actualizarEscenaYBot() {
 }
 async function IdPorNombre(nombre,escena) {
   try {
-    const res = await obs.call("GetSceneItemList", {
-      sceneName: esc
+    const res = await obs.call("GetGroupSceneItemList", {
+      sceneName: "Bot"
     });
-    item = sceneItems.find(
+    item = res.sceneItems.find(
     i => i.sourceName === nombre
     );
+    console.log(item.sceneItemId);
+
     return item.sceneItemId;
 
   } catch (err) {
@@ -205,59 +246,71 @@ async function SuscRaid(sessionId) {
   });
 
 }
+async function SuscUpdate(sessionId) {
+  await fetch("https://api.twitch.tv/helix/eventsub/subscriptions", {
+    method: "POST",
+    headers: {
+      "Client-ID": process.env.CLIENT_ID,
+      "Authorization": `Bearer ${process.env.ACCESS_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      type: "channel.update",
+      version: "2",
+      condition: {
+        to_broadcaster_user_id: process.env.BROADCASTER_ID
+      },
+      transport: {
+        method: "websocket",
+        session_id: sessionId
+      }
+    })
+  });
+
+}
 async function dado(number){
     if(number==1)
       {
-                await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("explosion",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        const nom = await IdPorNombre("explosion",esc);
+        await obs.call('SetSceneItemEnabled', {
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
 
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-            sceneName: esc,
-            sceneItemId: IdPorNombre("explosion",esc),
+            sceneName: "Bot",
+            sceneItemId: nom,
             sceneItemEnabled: false
             });
         }, 3000);
       }
     else if (number<6 && number>1)
       {
-        await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: 3, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
-        sceneItemEnabled: true
-        });
-
-        setTimeout(async () => {
-        await obs.call('SetSceneItemEnabled', {
-            sceneName: esc,
-            sceneItemId: 3,
-            sceneItemEnabled: false
-            });
-        }, 3000);
+        sonidos("Yippee")//TODO: agregar de menor a 3 waaaaaaaa
       }
     else
       {
+        const nom = await IdPorNombre("6",esc);
         await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("6",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: true
         });
-        clap();
+        sonidos("Aplausos");
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("6",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         }, 3000);
     }
 }
-async function clap() {
+async function sonidos(nombre) {
   await obs.call("TriggerMediaInputAction", {
-        inputName: "aplausos",
+        inputName: nombre,
         mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
         });
 }
@@ -280,9 +333,10 @@ async function verHotkeys() {
   console.log(JSON.stringify(list, null, 2));
 }
 async function N_Follow(Nombre) {
+  const nom = await IdPorNombre(nombre,esc);
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("follow",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -295,8 +349,8 @@ async function N_Follow(Nombre) {
 
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("follow",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         
@@ -309,9 +363,10 @@ async function N_Follow(Nombre) {
   }, 3000);
 }
 async function N_Raid(Nombre,cantidad) {
+  const nom = await IdPorNombre(nombre,esc);
     await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("raid",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -323,8 +378,8 @@ async function N_Raid(Nombre,cantidad) {
     });
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("raid",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         }, 3000);
@@ -335,3 +390,27 @@ async function N_Raid(Nombre,cantidad) {
         }
     });
 }
+async function N_Update(nombre,titulo,categoria) {
+  client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
+}//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
+async function AnimacionesEx(nombre) {//para dance, pet y comida
+  const nom = await IdPorNombre(nombre,esc);
+    console.log(nom)
+    await obs.call('SetSceneItemEnabled', {
+          sceneName: "Bot",
+          sceneItemId: nom,
+          sceneItemEnabled: true
+          });
+
+        setTimeout(async () => {
+        await obs.call('SetSceneItemEnabled', {
+            sceneName: "Bot",
+            sceneItemId: nom,
+            sceneItemEnabled: false
+            });
+        }, 10000);
+}
+//ideas: !dance: perro bailando, !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion, !pet: se explica solo
+//!comida: come un alimento aleatorio de minecraft, !sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
+//boss(el mas potente que he pensado): con !hit alto,medio,bajo enfrentas a un jefe y su vida baja en el obs
+//primer mensaje: este toca, 
