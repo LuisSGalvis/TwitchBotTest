@@ -124,7 +124,7 @@ const commands={
   "!dance":()=>
     {
       AnimacionesEx("baile")
-    }
+    },
 
 }
 
@@ -175,14 +175,16 @@ async function actualizarEscenaYBot() {
     console.error('Error actualizando:', err);
   }
 }
+
 async function IdPorNombre(nombre,escena) {
   try {
     const res = await obs.call("GetSceneItemList", {
       sceneName: esc
     });
-    item = sceneItems.find(
+    item = res.sceneItems.find(
     i => i.sourceName === nombre
     );
+    console.log("a"+item.sceneItemId);
     return item.sceneItemId;
 
   } catch (err) {
