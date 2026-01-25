@@ -98,23 +98,20 @@ const commands={
 
   "!hola": (channel, tags) => 
     {
-    client.say(channel, `@${tags.username}, bienvenido al chat!`);
-    obs.call("TriggerMediaInputAction", {
-      inputName: "Hola",
-      mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
-    });
+      client.say(channel, `@${tags.username}, bienvenido al chat!`);
+      sonidos("Hola");
     },
   "!clap":() =>
     {
-      clap();
+      sonidos("Aplausos");
     },
   "!test":()=>
     {
-      N_Follow("a")
+      N_Follow("a");
     },
   "!pet":()=>
     {
-      AnimacionesEx("pet")
+      AnimacionesEx("pet");
     },
   "!comida":()=>
     {
@@ -175,16 +172,16 @@ async function actualizarEscenaYBot() {
     console.error('Error actualizando:', err);
   }
 }
-
 async function IdPorNombre(nombre,escena) {
   try {
-    const res = await obs.call("GetSceneItemList", {
-      sceneName: esc
+    const res = await obs.call("GetGroupSceneItemList", {
+      sceneName: "Bot"
     });
     item = res.sceneItems.find(
     i => i.sourceName === nombre
     );
-    console.log("a"+item.sceneItemId);
+    console.log(item.sceneItemId);
+
     return item.sceneItemId;
 
   } catch (err) {
@@ -274,56 +271,46 @@ async function SuscUpdate(sessionId) {
 async function dado(number){
     if(number==1)
       {
+        const nom = await IdPorNombre("explosion",esc);
         await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("explosion",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
 
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-            sceneName: esc,
-            sceneItemId: IdPorNombre("explosion",esc),
+            sceneName: "Bot",
+            sceneItemId: nom,
             sceneItemEnabled: false
             });
         }, 3000);
       }
     else if (number<6 && number>1)
       {
-        await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: 3, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
-        sceneItemEnabled: true
-        });
-
-        setTimeout(async () => {
-        await obs.call('SetSceneItemEnabled', {
-            sceneName: esc,
-            sceneItemId: 3,
-            sceneItemEnabled: false
-            });
-        }, 3000);
+        sonidos("Yippee")//TODO: agregar de menor a 3 waaaaaaaa
       }
     else
       {
+        const nom = await IdPorNombre("6",esc);
         await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("6",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: true
         });
-        clap();
+        sonidos("Aplausos");
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("6",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         }, 3000);
     }
 }
-async function clap() {
+async function sonidos(nombre) {
   await obs.call("TriggerMediaInputAction", {
-        inputName: "aplausos",
+        inputName: nombre,
         mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
         });
 }
@@ -346,9 +333,10 @@ async function verHotkeys() {
   console.log(JSON.stringify(list, null, 2));
 }
 async function N_Follow(Nombre) {
+  const nom = await IdPorNombre(nombre,esc);
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("follow",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -361,8 +349,8 @@ async function N_Follow(Nombre) {
 
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("follow",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         
@@ -375,9 +363,10 @@ async function N_Follow(Nombre) {
   }, 3000);
 }
 async function N_Raid(Nombre,cantidad) {
+  const nom = await IdPorNombre(nombre,esc);
     await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("raid",esc), //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
+        sceneName: "Bot",
+        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
         sceneItemEnabled: true
         });
   await obs.call("SetInputSettings", {
@@ -389,8 +378,8 @@ async function N_Raid(Nombre,cantidad) {
     });
         setTimeout(async () => {
   await obs.call('SetSceneItemEnabled', {
-        sceneName: esc,
-        sceneItemId: IdPorNombre("raid",esc),
+        sceneName: "Bot",
+        sceneItemId: nom,
         sceneItemEnabled: false
         });
         }, 3000);
@@ -405,19 +394,21 @@ async function N_Update(nombre,titulo,categoria) {
   client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
 }//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
 async function AnimacionesEx(nombre) {//para dance, pet y comida
+  const nom = await IdPorNombre(nombre,esc);
+    console.log(nom)
     await obs.call('SetSceneItemEnabled', {
-          sceneName: esc,
-          sceneItemId: IdPorNombre(nombre,esc),
+          sceneName: "Bot",
+          sceneItemId: nom,
           sceneItemEnabled: true
           });
 
         setTimeout(async () => {
         await obs.call('SetSceneItemEnabled', {
-            sceneName: esc,
-            sceneItemId: IdPorNombre(nombre,esc),
+            sceneName: "Bot",
+            sceneItemId: nom,
             sceneItemEnabled: false
             });
-        }, 3000);
+        }, 10000);
 }
 //ideas: !dance: perro bailando, !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion, !pet: se explica solo
 //!comida: come un alimento aleatorio de minecraft, !sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
