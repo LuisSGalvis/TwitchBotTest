@@ -181,7 +181,6 @@ async function IdPorNombre(nombre) {
     i => i.sourceName === nombre
     );
     //console.log(item.sceneItemId);
-
     return item.sceneItemId;
 
   } catch (err) {
@@ -283,12 +282,7 @@ async function dado(number){
         sonidos("Aplausos");
     }
 }
-async function sonidos(Nombre) {
-  await obs.call("TriggerMediaInputAction", {
-        inputName: Nombre,
-        mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
-        });
-}
+
 async function listarItemsDeEscena(sceneName) {
   try {
     const res = await obs.call("GetSceneItemList", {
@@ -346,6 +340,19 @@ async function N_Raid(Nombre,cantidad) {
 async function N_Update(nombre,titulo,categoria) {
   client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
 }//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
+
+//----Funciones de activar cosas juntadas---- re profesional poniendo separaciones si o no
+
+// async function Texto(Texto,extra?,tiempo) { //TODO
+  
+// }
+
+async function sonidos(Nombre) {
+  await obs.call("TriggerMediaInputAction", {
+        inputName: Nombre,
+        mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
+        });
+}
 async function AnimacionesEx(Nombre,tiempo=10000) {//para dance, pet y comida, TODO agregar timeout personalizable
   const nom = await IdPorNombre(Nombre);
     console.log(nom)
