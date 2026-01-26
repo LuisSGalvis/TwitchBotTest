@@ -5,30 +5,23 @@ const obs = new OBSWebSocket();
 const WebSocket = require("ws");
 const fetch = require("node-fetch");
 const eventsub = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
-//const fs = require('fs');
+const fs = require('fs');
+var DatMech 
 
-// const data = { nombre: "Juan", edad: 30 };
-// const jsonString = JSON.stringify(data, null, 2); // null, 2 para formato legible
+fs.readFile('mecha.json', 'utf8', (err, jsonString) => {
+   if (err) {
+     console.error('Error al leer archivo:', err);
+     return;
+   }
+   try {
+     const DataMech = JSON.parse(jsonString);
+     DatMech=DataMech
+     console.log('Datos cargados:', DataMech); // Aquí tienes el objeto JS
+   } catch (err) {
+     console.error('Error al parsear JSON:', err);
+   }
+});
 
-// fs.writeFile('datos.json', jsonString, (err) => {
-//   if (err) {
-//     console.error('Error al escribir archivo:', err);
-//   } else {
-//     console.log('¡Datos guardados en datos.json!');
-//   }
-// });
-// fs.readFile('datos.json', 'utf8', (err, jsonString) => {
-//   if (err) {
-//     console.error('Error al leer archivo:', err);
-//     return;
-//   }
-//   try {
-//     const data = JSON.parse(jsonString);
-//     console.log('Datos cargados:', data); // Aquí tienes el objeto JS
-//   } catch (err) {
-//     console.error('Error al parsear JSON:', err);
-//   }
-// });
 
 
 obs.connect(
@@ -116,27 +109,57 @@ const commands={
   "!comida":()=>
     {
       const result = Math.floor(Math.random() * 5) + 1;
-      AnimacionesEx(`minecraft${result}`,4000);
+      AnimacionesEx(`minecraft${result}`,4000);//minecraft5
     },
   "!dance":()=>
     {
       AnimacionesEx("baile")
     },
+  "!build":(channel, tags, args)=>//!build brazos
+    {
+      const arg = args.trim().split(/\s+/);
+      console.log(arg)
+      const piezaMech = arg[1].trim().toLowerCase();
+      console.log(piezaMech);
+      if(DatMech.Partes.includes(piezaMech))
+        {console.log(piezaMech)
+          if(DatMech.PartesEnc.includes(piezaMech))
+            {
+              client.say(channel, `@${tags.username}, esa parte ya fue encontrada, prueba otra`);
+            } else
+            {
+              DatMech.PartesEnc.push(piezaMech);
+              fs.writeFile('mecha.json', JSON.stringify(DatMech, null, 2), (err) => {
+                if (err) {
+                  console.error('Error al escribir archivo:', err);
+                } else {
+                  client.say(channel, `@${tags.username}, Lo lograste, encontraste la pieza ${piezaMech}!`);
+                }
+              });
+              if(DatMech.Partes.lenght===DatMech.PartesEnc.lenght)
+                {
+                  //TODO, una animacion bien epica
+                }
+            }
+            
+        } else
+          {
+            client.say(channel, `@${tags.username}, nope, esa pieza no existe, trata otra`);
+          }
+    },
 
 }
-
-
 client.connect();
 client.on('message', (channel, tags, message, self) => {
 	if(self) return;
 
-	const command = message.trim().toLowerCase();
+  const args = message.trim().split(/\s+/);
+	const command = args[0].trim().toLowerCase();
 
     if(commands[command]) {
         commands[command](channel, tags, message);
     }
 });
-
 eventsub.on("message", async (raw) => {
   const msg = JSON.parse(raw);
   if (msg.metadata?.message_type === "session_welcome") {
@@ -159,7 +182,6 @@ eventsub.on("message", async (raw) => {
     }
   }
 });
-
 async function actualizarEscenaYBot() {
   try {
     const { currentProgramSceneName } = await obs.call('GetCurrentProgramScene');
@@ -282,7 +304,6 @@ async function dado(number){
         sonidos("Aplausos");
     }
 }
-
 async function listarItemsDeEscena(sceneName) {
   try {
     const res = await obs.call("GetSceneItemList", {
@@ -343,10 +364,8 @@ async function N_Update(nombre,titulo,categoria) {
 
 //----Funciones de activar cosas juntadas---- re profesional poniendo separaciones si o no
 
-// async function Texto(Texto,extra?,tiempo) { //TODO
-  
-// }
-
+// async function Texto(Texto,extra?,tiempo) { //TODO 
+//}
 async function sonidos(Nombre) {
   await obs.call("TriggerMediaInputAction", {
         inputName: Nombre,
@@ -355,7 +374,7 @@ async function sonidos(Nombre) {
 }
 async function AnimacionesEx(Nombre,tiempo=10000) {//para dance, pet y comida, TODO agregar timeout personalizable
   const nom = await IdPorNombre(Nombre);
-    console.log(nom)
+    //console.log(nom)
     await obs.call('SetSceneItemEnabled', {
           sceneName: "Bot",
           sceneItemId: nom,
@@ -374,3 +393,4 @@ async function AnimacionesEx(Nombre,tiempo=10000) {//para dance, pet y comida, T
 //!sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
 //boss(el mas potente que he pensado): con !hit alto,medio,bajo enfrentas a un jefe y su vida baja en el obs
 //primer mensaje: este toca, 
+//
