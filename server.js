@@ -308,9 +308,9 @@ async function dado(number){
         }, 3000);
     }
 }
-async function sonidos(nombre) {
+async function sonidos(Nombre) {
   await obs.call("TriggerMediaInputAction", {
-        inputName: nombre,
+        inputName: Nombre,
         mediaAction: "OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
         });
 }
@@ -333,42 +333,25 @@ async function verHotkeys() {
   console.log(JSON.stringify(list, null, 2));
 }
 async function N_Follow(Nombre) {
-  const nom = await IdPorNombre(nombre,esc);
-  await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
-        sceneItemEnabled: true
-        });
-  await obs.call("SetInputSettings", {
+  AnimacionesEx("baile")
+  await obs.call("SetInputSettings", { //TODO: crear funcion de texto
         inputName: "Texto",
         inputSettings: {
-            text: `¡Gracias por seguir, ${Nombre}!` //cambia el texto a gracias por seguir
+            text: `Gracias por seguir, ${Nombre}!` //cambia el texto a gracias por seguir
         }
     });
-  
-
         setTimeout(async () => {
-  await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: nom,
-        sceneItemEnabled: false
-        });
-        
   await obs.call("SetInputSettings", {
         inputName: "Texto",
         inputSettings: {
             text: ``
         }
     });
-  }, 3000);
+  }, 5000);
 }
 async function N_Raid(Nombre,cantidad) {
-  const nom = await IdPorNombre(nombre,esc);
-    await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: nom, //cambiar esto a cual sea el id del objeto que quieres borrar, yo lo tengo en 7
-        sceneItemEnabled: true
-        });
+  const nom = await IdPorNombre("baile",esc);
+  
   await obs.call("SetInputSettings", {
         inputName: "Texto", //es el mismo que de seguidores porque soy recursivo
         inputSettings: {
@@ -377,24 +360,20 @@ async function N_Raid(Nombre,cantidad) {
         }
     });
         setTimeout(async () => {
-  await obs.call('SetSceneItemEnabled', {
-        sceneName: "Bot",
-        sceneItemId: nom,
-        sceneItemEnabled: false
-        });
-        }, 3000);
   await obs.call("SetInputSettings", {
         inputName: "Texto",
         inputSettings: {
             text: ``
         }
+        }, 10000);
+  
     });
 }
 async function N_Update(nombre,titulo,categoria) {
   client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
 }//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
-async function AnimacionesEx(nombre) {//para dance, pet y comida
-  const nom = await IdPorNombre(nombre,esc);
+async function AnimacionesEx(Nombre) {//para dance, pet y comida, TODO agregar timeout personalizable
+  const nom = await IdPorNombre(Nombre,esc);
     console.log(nom)
     await obs.call('SetSceneItemEnabled', {
           sceneName: "Bot",
@@ -410,7 +389,7 @@ async function AnimacionesEx(nombre) {//para dance, pet y comida
             });
         }, 10000);
 }
-//ideas: !dance: perro bailando, !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion, !pet: se explica solo
-//!comida: come un alimento aleatorio de minecraft, !sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
+//ideas: !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion
+//!sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
 //boss(el mas potente que he pensado): con !hit alto,medio,bajo enfrentas a un jefe y su vida baja en el obs
 //primer mensaje: este toca, 
