@@ -7,6 +7,7 @@ const fetch = require("node-fetch");
 const eventsub = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
 const fs = require('fs');
 var DatMech 
+var J8Ball
 
 fs.readFile('mecha.json', 'utf8', (err, jsonString) => {
    if (err) {
@@ -16,12 +17,24 @@ fs.readFile('mecha.json', 'utf8', (err, jsonString) => {
    try {
      const DataMech = JSON.parse(jsonString);
      DatMech=DataMech
-     console.log('Datos cargados:', DataMech); // Aquí tienes el objeto JS
+     console.log('Datos cargados:', DataMech); // objeto JS
    } catch (err) {
      console.error('Error al parsear JSON:', err);
    }
 });
-
+fs.readFile('8Ball.json', 'utf8', (err, jsonString) => {
+   if (err) {
+     console.error('Error al leer archivo:', err);
+     return;
+   }
+   try {
+     const J8ball = JSON.parse(jsonString);
+     J8Ball=J8ball
+     console.log('Datos cargados:', J8ball); // objeto JS
+   } catch (err) {
+     console.error('Error al parsear JSON:', err);
+   }
+});
 
 
 obs.connect(
@@ -62,7 +75,7 @@ const client = new tmi.Client({
 		username: process.env.TB_USERNAME,
 		password: process.env.TB_AT,
 	},
-	channels: ['PlayItCharles']
+	channels: [process.env.CHANNEL_NAME]//TODO: poner esto en el env
 });
 const commands={
 "!dado": (channel, tags) => 
@@ -114,6 +127,28 @@ const commands={
   "!dance":()=>
     {
       AnimacionesEx("baile")
+    },
+  "!8ball":(channel)=>
+    {
+      client.say(channel, `${(J8Ball.frases[(Math.floor(Math.random() * J8Ball.frases.length))])}`);
+    },
+  "!adios":(channel,tags)=>
+    {
+      client.say(channel, `Bueno @${tags.username}, nos vemos, que descanses!`);
+    },
+  "!dabmeup":(channel,tags,message)=>
+    {
+      const mencion = message.match(/@(\w+)/);
+      console.log(mencion)
+      client.say(channel, `@${tags.username} saluda a @${mencion[1]}`);
+      AnimacionesEx("DabUp",10000);
+    },
+  "!abrazo":(channel,tags,message)=>
+    {
+      const mencion = message.match(/@(\w+)/);
+      console.log(mencion)
+      client.say(channel, `@${tags.username} abraza a @${mencion[1]}`);
+      AnimacionesEx("abrazo",10000);
     },
   "!build":(channel, tags, args)=>//!build brazos
     {
@@ -389,8 +424,7 @@ async function AnimacionesEx(Nombre,tiempo=10000) {//para dance, pet y comida, T
             });
         }, tiempo);
 }
-//ideas: !mecha parte: minijuego para armar un "mecha", al completarse sale una animacion
 //!sunny: gafas de sol, !abrazo @user: sale animacion y mensaje en el chat
 //boss(el mas potente que he pensado): con !hit alto,medio,bajo enfrentas a un jefe y su vida baja en el obs
 //primer mensaje: este toca, 
-//
+//!pez rotatorio
