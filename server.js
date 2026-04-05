@@ -6,6 +6,8 @@ const WebSocket = require("ws");
 const fetch = require("node-fetch");
 const eventsub = new WebSocket("wss://eventsub.wss.twitch.tv/ws");
 const fs = require('fs');
+const { channel } = require('tmi.js/lib/utils');
+var chan;
 var DatMech 
 var J8Ball
 
@@ -113,7 +115,7 @@ const commands={
     },
   "!test":()=>
     {
-      N_Follow("a");
+
     },
   "!pet":()=>
     {
@@ -127,6 +129,10 @@ const commands={
   "!dance":()=>
     {
       AnimacionesEx("baile")
+    },
+    "!cry":()=>
+    {
+      AnimacionesEx("cry",10000);
     },
   "!8ball":(channel)=>
     {
@@ -190,13 +196,18 @@ client.on('message', (channel, tags, message, self) => {
 
   const args = message.trim().split(/\s+/);
 	const command = args[0].trim().toLowerCase();
+  chan = channel;
 
     if(commands[command]) {
         commands[command](channel, tags, message);
     }
+  
 });
 eventsub.on("message", async (raw) => {
   const msg = JSON.parse(raw);
+  if (msg.metadata?.message_type === "notification") {
+  console.log(JSON.stringify(msg, null, 2));
+  }
   if (msg.metadata?.message_type === "session_welcome") {
     const sessionId = msg.payload.session.id;
     console.log("Session ID:", sessionId);
@@ -204,8 +215,12 @@ eventsub.on("message", async (raw) => {
     await SuscRaid(sessionId);
     await SuscUpdate(sessionId);
   }
+  if (msg.metadata?.message_type === "session_welcome") {
+  console.log(JSON.stringify(msg, null, 2));
+  }
   if (msg.metadata?.message_type === "notification") {
-    const { type, event } = msg.payload;
+    const event = msg.payload.event;
+    const type = msg.payload.subscription.type;
     if (type === "channel.follow") {
       N_Follow(event.user_name)
     }
@@ -213,7 +228,7 @@ eventsub.on("message", async (raw) => {
       N_Raid(event.from_broadcaster_user_name,event.viewers)
     }
     if (type==="channel.update"){
-      N_Update(event.from_broadcaster_user_name,event.title,event.category_name)
+      N_Update(event.title,event.category_name)
     }
   }
 });
@@ -278,6 +293,7 @@ async function SuscFollow(sessionId) {
       }
     })
   });
+  
 
 }
 async function SuscRaid(sessionId) {
@@ -314,7 +330,7 @@ async function SuscUpdate(sessionId) {
       type: "channel.update",
       version: "2",
       condition: {
-        to_broadcaster_user_id: process.env.BROADCASTER_ID
+        broadcaster_user_id: process.env.BROADCASTER_ID
       },
       transport: {
         method: "websocket",
@@ -358,6 +374,7 @@ async function verHotkeys() {
   console.log(JSON.stringify(list, null, 2));
 }
 async function N_Follow(Nombre) {
+  console.log("follow");
   AnimacionesEx("baile")
   await obs.call("SetInputSettings", { //TODO: crear funcion de texto
         inputName: "Texto",
@@ -375,6 +392,7 @@ async function N_Follow(Nombre) {
   }, 5000);
 }
 async function N_Raid(Nombre,cantidad) {
+  console.log("follow");
   AnimacionesEx("baile")  
   await obs.call("SetInputSettings", {
         inputName: "Texto", //es el mismo que de seguidores porque soy recursivo
@@ -393,9 +411,10 @@ async function N_Raid(Nombre,cantidad) {
   
     });
 }
-async function N_Update(nombre,titulo,categoria) {
-  client.say(channel, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
-}//puedo juntarlos en una nueva funcion creo// tras consideracion no puedo
+async function N_Update(titulo,categoria) {
+  console.log("update");
+  client.say(chan, `nuevo tema: titulo-->${titulo} y categoria-->${categoria}, ojala sigas disfrutando`);
+}//puedo juntarlos en una nueva funcion creo // tras consideracion no puedo
 
 //----Funciones de activar cosas juntadas---- re profesional poniendo separaciones si o no
 
